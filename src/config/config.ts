@@ -4,6 +4,28 @@ export const idbConfig = {
   version: 1,
   stores: [
     {
+      name: "groups",
+      id: { keyPath: "id", autoIncrement: false },
+      indices: [
+        { name: "title", keyPath: "title", options: { unique: false } },
+        {
+          name: "description",
+          keyPath: "description",
+          options: {
+            unique: false,
+          },
+        },
+        {
+          name: "createdAt",
+          keyPath: "createdAt",
+        },
+        {
+          name: "updatedAt",
+          keyPath: "updatedAt",
+        },
+      ],
+    },
+    {
       name: "todos",
       id: { keyPath: "id", autoIncrement: true },
       indices: [
