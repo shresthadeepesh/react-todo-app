@@ -160,6 +160,20 @@ function App() {
     reset();
   }, [editTodo, reset]);
 
+  const handleExport = useCallback(() => {
+    const buffer = new Blob([decodeURIComponent(JSON.stringify(todos))], {
+      type: "application/json;charset=utf-8",
+    });
+
+    const link = document.createElement("a");
+    link.download = "todos.json";
+    const obj = window.URL.createObjectURL(buffer);
+    link.href = obj;
+    link.download = "todos.json";
+    link.click();
+    window.URL.revokeObjectURL(obj);
+  }, [todos]);
+
   return (
     <div className="App container">
       <div className="flex flex-wrap">
@@ -220,6 +234,11 @@ function App() {
           </div>
         </div>
         <div className="w-full md:w-2/3">
+          <div className="flex justify-end my-5 space-x-2">
+            <button className="btn bg-blue-500" onClick={handleExport}>
+              Export
+            </button>
+          </div>
           <div className="" ref={uncompletedAnimation}>
             {uncompletedTodo.map((todo) => (
               <Item
