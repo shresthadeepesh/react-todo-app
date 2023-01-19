@@ -1,5 +1,9 @@
-import { FC } from "react";
+import dayjs from "dayjs";
+import { FC, useEffect } from "react";
 import { Todo } from "../../models/Todo";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 interface ItemProps {
   todo: Todo;
@@ -9,11 +13,26 @@ interface ItemProps {
 }
 
 const Item: FC<ItemProps> = ({
-  todo: { id, title, description, status },
+  todo: { id, title, description, status, remindIn },
   handleDelete,
   handleEdit,
   handleStatusChange,
 }) => {
+  //setting an infinite alarm
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!status && dayjs(remindIn).isSame(dayjs(), "minute")) {
+        new Notification(title, {
+          body: description,
+          icon: "",
+        });
+        clearInterval(interval);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [description, remindIn, status, title]);
+
   return (
     <div className="p-5 m-5 bg-white bg-opacity-20 backdrop-blur-lg rounded drop-shadow-lg transition-shadow duration-500 shadow-md hover:shadow-xl">
       <div className="flex justify-between">
@@ -25,9 +44,12 @@ const Item: FC<ItemProps> = ({
               checked={status}
             />
           </div>
-          <div className="text-white">
-            <h3 className="text-2xl">{title}</h3>
-            <p className="text-xl">{description}</p>
+          <div className="text-white space-y-3">
+            <h3 className="text-3xl">{title}</h3>
+            <p className="text-lg">{description}</p>
+            {remindIn ? (
+              <div className="text-sm">Remind: {dayjs(remindIn).fromNow()}</div>
+            ) : null}
           </div>
         </div>
 

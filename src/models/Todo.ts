@@ -3,6 +3,7 @@ export interface Todo {
   title: string;
   description: string;
   status: boolean;
-  createdAt: any;
-  updatedAt: any;
+  remindIn: string;
+  createdAt: string;
+  updatedAt: string;
 }
