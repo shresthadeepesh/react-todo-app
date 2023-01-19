@@ -20,17 +20,19 @@ const Item: FC<ItemProps> = ({
 }) => {
   //setting an infinite alarm
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (!status && dayjs(remindIn).isSame(dayjs(), "minute")) {
-        new Notification(title, {
-          body: description,
-          icon: "",
-        });
-        clearInterval(interval);
-      }
-    }, 1000);
+    if (Notification.permission === "granted") {
+      const interval = setInterval(() => {
+        if (!status && dayjs(remindIn).isSame(dayjs(), "minute")) {
+          new Notification(title, {
+            body: description,
+            icon: "",
+          });
+          clearInterval(interval);
+        }
+      }, 1000);
 
-    return () => clearInterval(interval);
+      return () => clearInterval(interval);
+    }
   }, [description, remindIn, status, title]);
 
   return (
