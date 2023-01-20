@@ -22,7 +22,9 @@ const Item: FC<ItemProps> = ({
   useEffect(() => {
     if (Notification.permission === "granted") {
       const interval = setInterval(() => {
-        if (!status && dayjs(remindIn).isSame(dayjs(), "minute")) {
+        if (status || dayjs(remindIn).isBefore(dayjs())) {
+          clearInterval(interval);
+        } else if (!status && dayjs(remindIn).isSame(dayjs(), "minute")) {
           new Notification(title, {
             body: description,
             icon: "",
