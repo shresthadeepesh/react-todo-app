@@ -20,7 +20,7 @@ const Item: FC<ItemProps> = ({
 }) => {
   //setting an infinite alarm
   useEffect(() => {
-    if (Notification.permission === "granted") {
+    if ("Notification" in window && Notification.permission === "granted") {
       const interval = setInterval(() => {
         if (status || dayjs(remindIn).isBefore(dayjs())) {
           clearInterval(interval);
@@ -31,7 +31,7 @@ const Item: FC<ItemProps> = ({
           });
           clearInterval(interval);
         }
-      }, 1000);
+      }, 1000 * 60); //1 minute
 
       return () => clearInterval(interval);
     }

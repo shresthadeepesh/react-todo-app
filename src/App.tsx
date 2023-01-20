@@ -44,9 +44,11 @@ function App() {
   }, [getTodos]);
 
   useEffect(() => {
-    Notification.requestPermission().catch((err) => {
-      console.log("Notification errors...", err);
-    });
+    if ("Notification" in window) {
+      Notification.requestPermission().catch((err) => {
+        console.log("Notification errors...", err);
+      });
+    }
   }, []);
 
   const handleStatusChange = useCallback(
