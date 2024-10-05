@@ -52,6 +52,21 @@ export const idbConfig = {
           name: "updatedAt",
           keyPath: "updatedAt",
         },
+        {
+          name: "inProgress",
+          keyPath: "inProgress",
+          options: {
+            unique: false,
+          },
+        },
+        {
+          name: "startedAt",
+          keyPath: "startedAt",
+        },
+        {
+          name: "endedAt",
+          keyPath: "endedAt",
+        },
       ],
     },
   ],

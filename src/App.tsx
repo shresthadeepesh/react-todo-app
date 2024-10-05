@@ -4,24 +4,21 @@ import { idbConfig } from "./config/config";
 import dayjs from "dayjs";
 import { Todo } from "./models/Todo";
 import { useForm } from "react-hook-form";
-import Item from "./components/Todo/item";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 import Form from "./components/Todo/form";
+import { groupByUpdatedAt } from "./helper";
+import TodoList from "./components/Todo/list";
 
 function App() {
   const { deleteByID, getAll, getByID, update } = useIndexedDBStore("todos");
   const [todos, setTodos] = useState<Todo[]>([]);
   const [editTodo, setEditTodo] = useState<Todo>();
   const { setValue } = useForm();
-  const [completedAnimation] = useAutoAnimate<HTMLDivElement>();
-  const [uncompletedAnimation] = useAutoAnimate<HTMLDivElement>();
   const [formAnimate] = useAutoAnimate<HTMLDivElement>();
 
-  const completedTodo = useMemo(() => todos.filter((el) => el.status), [todos]);
-  const uncompletedTodo = useMemo(
-    () => todos.filter((el) => !el.status),
-    [todos]
-  );
+  const groupedTodos = useMemo(() => {
+    return groupByUpdatedAt(todos);
+  }, [todos]);
 
   const getTodos = useCallback(async () => {
     const todo = (await getAll()) as Todo[];
@@ -55,20 +52,69 @@ function App() {
     (id: number) => {
       getByID(id).then((res) => {
         const todo = res as Todo;
-        //update database
-        update({
+
+        const updatedTodo = {
           ...todo,
           status: !todo.status,
-        });
+          updatedAt: dayjs().toISOString(),
+        };
+
+        //update database
+        update(updatedTodo);
 
         //update state
         const updatedTodos = todos.map((el) =>
-          el.id === id
-            ? {
-                ...el,
-                status: !todo.status,
-              }
-            : el
+          el.id === id ? updatedTodo : el
+        );
+        setTodos(updatedTodos);
+      });
+    },
+    [getByID, todos, update]
+  );
+
+  const handleStart = useCallback(
+    (id: number) => {
+      getByID(id).then((res) => {
+        const todo = res as Todo;
+
+        const updatedTodo = {
+          ...todo,
+          inProgress: true,
+          startedAt: dayjs().toISOString(),
+          endedAt: null,
+        };
+
+        //update database
+        update(updatedTodo);
+
+        //update state
+        const updatedTodos = todos.map((el) =>
+          el.id === id ? updatedTodo : el
+        );
+        setTodos(updatedTodos);
+      });
+    },
+    [getByID, todos, update]
+  );
+
+  const handleEnd = useCallback(
+    (id: number) => {
+      getByID(id).then((res) => {
+        const todo = res as Todo;
+
+        const updatedTodo = {
+          ...todo,
+          updatedAt: dayjs().toISOString(),
+          inProgress: false,
+          endedAt: dayjs().toISOString(),
+        };
+
+        //update database
+        update(updatedTodo);
+
+        //update state
+        const updatedTodos = todos.map((el) =>
+          el.id === id ? updatedTodo : el
         );
         setTodos(updatedTodos);
       });
@@ -116,11 +162,11 @@ function App() {
   }, [todos]);
 
   return (
-    <div className="App container">
+    <div className="container App">
       <div className="flex flex-wrap">
         <div className="w-full md:w-1/3">
           <div
-            className="p-5 m-5 bg-white bg-opacity-20 backdrop-blur-lg rounded drop-shadow-lg transition-shadow duration-500 shadow-md hover:shadow-xl sticky top-10"
+            className="sticky p-5 m-5 transition-shadow duration-500 bg-white shadow-md bg-opacity-20 backdrop-blur-lg rounded-xl drop-shadow-lg hover:shadow-xl top-10"
             ref={formAnimate}
           >
             <Form
@@ -133,32 +179,28 @@ function App() {
         </div>
         <div className="w-full md:w-2/3">
           <div className="flex justify-end my-5 space-x-2">
-            <button className="btn bg-blue-500" onClick={handleExport}>
+            <button className="bg-blue-500 btn" onClick={handleExport}>
               Export
             </button>
           </div>
-          <div className="" ref={uncompletedAnimation}>
-            {uncompletedTodo.map((todo) => (
-              <Item
-                key={todo.id}
-                todo={todo}
-                handleDelete={handleDelete}
-                handleEdit={handleEdit}
-                handleStatusChange={handleStatusChange}
-              />
-            ))}
-          </div>
-          <div className="" ref={completedAnimation}>
-            {completedTodo.map((todo) => (
-              <Item
-                key={todo.id}
-                todo={todo}
-                handleDelete={handleDelete}
-                handleEdit={handleEdit}
-                handleStatusChange={handleStatusChange}
-              />
-            ))}
-          </div>
+
+          {Object.entries(groupedTodos).map(
+            ([date, todos]: [string, Todo[]]) => (
+              <div className="py-5 my-5 border rounded-xl" key={date}>
+                <div className="px-3 mx-3 text-white">
+                  {dayjs(date).format("DD MMM, YYYY")}
+                </div>
+                <TodoList
+                  todos={todos}
+                  handleDelete={handleDelete}
+                  handleEdit={handleEdit}
+                  handleStatusChange={handleStatusChange}
+                  handleEnd={handleEnd}
+                  handleStart={handleStart}
+                />
+              </div>
+            )
+          )}
         </div>
       </div>
     </div>

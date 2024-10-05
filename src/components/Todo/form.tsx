@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, useCallback, useEffect, useState, Dispatch, SetStateAction } from "react";
 import { useForm } from "react-hook-form";
 import { useIndexedDBStore } from "use-indexeddb";
 import { Todo } from "../../models/Todo";
@@ -7,9 +7,9 @@ import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 interface FormProps {
   editTodo?: Todo;
-  setEditTodo: React.Dispatch<React.SetStateAction<Todo | undefined>>;
+  setEditTodo: Dispatch<SetStateAction<Todo | undefined>>;
   todos: Todo[];
-  setTodos: React.Dispatch<React.SetStateAction<Todo[]>>;
+  setTodos: Dispatch<SetStateAction<Todo[]>>;
 }
 
 const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
@@ -22,7 +22,9 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
     setValue,
   } = useForm();
   const [isReminder, setIsReminder] = useState(false);
-  const [reminderAnimate] = useAutoAnimate<HTMLDivElement>();
+  const [reminderAnimate] = useAutoAnimate({
+    //
+  });
 
   useEffect(() => {
     setValue("title", editTodo?.title);
@@ -54,7 +56,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
           id: editTodo.id,
           ...data,
           status: false,
-          remindIn: dayjs(data.remindIn).toISOString(),
+          remindIn: isReminder ? dayjs(data.remindIn).toISOString() : null,
           updatedAt: dayjs().toISOString(),
         } as Todo;
 
@@ -77,7 +79,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
         const todo = {
           ...data,
           status: false,
-          remindIn: dayjs(data.remindIn).toISOString(),
+          remindIn: isReminder ? dayjs(data.remindIn).toISOString() : null,
           createdAt: dayjs().toISOString(),
           updatedAt: dayjs().toISOString(),
         } as Todo;
@@ -111,7 +113,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
           Title:
         </label>
         <input
-          className="w-full text-xl px-5 py-4 rounded-xl"
+          className="w-full px-5 py-4 text-xl rounded-xl"
           type="text"
           {...register("title", {
             required: "The title field is required.",
@@ -121,7 +123,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
           aria-invalid={errors.title ? "true" : "false"}
         />
         {errors.title && (
-          <small className="text-red-900">The title field is required.</small>
+          <small className="text-red-500">The title field is required.</small>
         )}
       </div>
 
@@ -130,7 +132,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
           Description:
         </label>
         <textarea
-          className="w-full text-xl px-5 py-4 rounded-xl h-56"
+          className="w-full h-56 px-5 py-4 text-xl rounded-xl"
           {...register("description", {
             required: "The description field is required.",
           })}
@@ -138,7 +140,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
           aria-invalid={errors.description ? "true" : "false"}
         />
         {errors.description && (
-          <small className="text-red-900">
+          <small className="text-red-500">
             The description field is required.
           </small>
         )}
@@ -151,7 +153,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
         <input
           checked={isReminder}
           onChange={handleReminderChange}
-          className="mx-5 text-xl px-5 py-4 rounded-xl w-5 h-5 "
+          className="w-5 h-5 px-5 py-4 mx-5 text-xl rounded-xl "
           type="checkbox"
         />
       </div>
@@ -163,7 +165,7 @@ const Form: FC<FormProps> = ({ editTodo, setEditTodo, todos, setTodos }) => {
               Remind In:
             </label>
             <input
-              className="w-full text-xl px-5 py-4 rounded-xl"
+              className="w-full px-5 py-4 text-xl rounded-xl"
               type="datetime-local"
               {...register("remindIn")}
             />

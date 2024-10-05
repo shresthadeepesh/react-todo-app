@@ -7,11 +7,12 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
+    background: #1D1E2C;
     /* @apply bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 background-animate; */
 }
 
 .btn {
-    @apply px-5 py-2 rounded-xl text-white hover:opacity-75 transition duration-200 cursor-pointer;
+    @apply px-5 py-2 text-white transition duration-200 cursor-pointer rounded-xl hover:opacity-75;
 }
 
   .background-animate {

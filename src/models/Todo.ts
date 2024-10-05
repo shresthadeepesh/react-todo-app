@@ -6,4 +6,7 @@ export interface Todo {
   remindIn: string;
   createdAt: string;
   updatedAt: string;
+  inProgress: boolean;
+  startedAt: string | null;
+  endedAt: string | null;
 }
